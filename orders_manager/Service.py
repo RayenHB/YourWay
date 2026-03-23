@@ -26,7 +26,7 @@ from datetime import datetime
 import uuid
 
 from FastAPI_back.utils.errors import BadRequestError, NotFoundError
-from orders_manager.helpers import is_valid_uae_postal_code, is_valid_uae_phone_number, send_email
+from orders_manager.helpers import is_valid_uae_postal_code, is_valid_uae_phone_number, send_email, send_notification
 
 
 
@@ -116,6 +116,7 @@ class Service:
             raise BadRequestError(message="Invalid UAE phone number.")
 
         send_email(order_payload)
+        send_notification(order_payload)
         # Create order with the created phone and case IDs
         return await self.order_service.create_order(order_payload)
 
@@ -146,6 +147,7 @@ class Service:
             raise BadRequestError(message="Invalid UAE phone number.")
 
         send_email(order_payload)
+        send_notification(order_payload)
         return await self.order_service.create_order(order_payload)
 
     @Transactional(propagation=Propagation.REQUIRED)

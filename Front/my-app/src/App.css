@@ -1312,6 +1312,19 @@
     min-height: auto;
   }
 
+  .editor-panel {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin-top: 12px;
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+    background: #fff7e8;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+
   .editor-topbar {
     justify-content: center;
   }
