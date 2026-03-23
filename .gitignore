@@ -18,6 +18,8 @@ env/
 # Environment files
 .env
 .env.*
+FastAPI_back/credentials.json
+temp.py
 
 # Logs
 *.log
