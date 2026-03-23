@@ -20,6 +20,9 @@ class AdminService(BaseService):
     def _normalize_email(self, email: str) -> str:
         return email.strip().lower()
 
+    async def count_admins(self) -> int:
+        return await self.admin_repository.count_admins()
+
 
     @Transactional(propagation=Propagation.REQUIRED)
     async def authenticate_Admin(self, admin_data: AdminLogin) -> AdminResponse:

@@ -21,7 +21,6 @@ def create_engine() -> AsyncEngine:
         pool_pre_ping=True,
         echo=False,
         pool_recycle=3600,
-        pool_size=100,
-        max_overflow=0,
-        
+        pool_size=settings.max_connection_count,
+        max_overflow=max(settings.max_connection_count - settings.min_connection_count, 0),
     )

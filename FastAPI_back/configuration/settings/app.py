@@ -1,6 +1,6 @@
 import logging
 import sys
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from loguru import logger
 from pydantic import PostgresDsn, SecretStr
@@ -29,10 +29,13 @@ class AppSettings(BaseAppSettings):
 
     api_prefix: str = "/api"
 
-    jwt_token_prefix: str = "Token"
+    jwt_token_prefix: str = "Bearer"
     jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60  # Access token expires in 30 minutes
-    refresh_token_expire_days: int = 7     
+    access_token_expire_minutes: int = 60
+    refresh_token_expire_days: int = 7
+    jwt_audience: Optional[str] = None
+    jwt_issuer: Optional[str] = None
+
     @property
     def jwt_config(self) -> Dict[str, Any]:
         return {
@@ -44,7 +47,7 @@ class AppSettings(BaseAppSettings):
             "issuer": self.jwt_issuer,
         }
 
-    allowed_hosts: List[str] = ["*"]
+    allowed_hosts: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
     logging_level: int = logging.INFO
     loggers: Tuple[str, str] = ("uvicorn.asgi", "uvicorn.access")

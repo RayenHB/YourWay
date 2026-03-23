@@ -48,8 +48,8 @@ class PhoneCaseTable(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    phone_model_id = Column(Integer, ForeignKey("used_phone_models.id"), nullable=False)
-    case_type_id = Column(Integer, ForeignKey("used_phone_case_types.id"), nullable=False)
+    phone_model_id = Column(Integer, ForeignKey("used_phone_models.id"), nullable=False, index=True)
+    case_type_id = Column(Integer, ForeignKey("used_phone_case_types.id"), nullable=False, index=True)
 
     # what you show in listing
     title = Column(String(200), nullable=True)     # "iPhone 16 Pro - MagSafe Case"
@@ -75,7 +75,7 @@ class PhoneCaseTemplateTable(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True)
-    phone_case_id = Column(Integer, ForeignKey("used_phone_cases.id"), nullable=False)
+    phone_case_id = Column(Integer, ForeignKey("used_phone_cases.id"), nullable=False, index=True)
 
     base_image_url = Column(String(500), nullable=False)    # blank case editor base
     print_mask_url = Column(String(500), nullable=False)    # mask with bleed (png)

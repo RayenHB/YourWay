@@ -13,7 +13,6 @@ sys.path.append(parent_path)
 
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from FastAPI_back.api import api_router
 from FastAPI_back.configuration.config import get_app_settings
@@ -27,18 +26,6 @@ from FastAPI_back.utils.error_handlers import (
 )
 from FastAPI_back.utils.errors import BaseError, NotFoundError
 from FastAPI_back.utils.events import handle_server_startup_event
-
-
-class EnsureCORSHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        try:
-            response = await call_next(request)
-        except Exception as e:
-            return python_base_error_handler(request,e)
-        response.headers.setdefault("Access-Control-Allow-Origin", "*")
-        response.headers.setdefault("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        response.headers.setdefault("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, Origin")
-        return response
 
 
 
@@ -58,7 +45,6 @@ def get_application() -> FastAPI:
         name="static",
     )
 
-    application.add_middleware(EnsureCORSHeadersMiddleware)
     # CORS Middleware
     application.add_middleware(
         CORSMiddleware,

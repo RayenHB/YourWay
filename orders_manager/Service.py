@@ -153,9 +153,11 @@ class Service:
     @Transactional(propagation=Propagation.REQUIRED)
     async def get_all_orders(
         self,
+        page: int = 1,
+        page_size: int = 50,
     ) -> List[OrderResponse]:
         """Retrieve all orders with their phone models and case types"""
-        return await self.order_service.get_all_orders()
+        return await self.order_service.get_all_orders(page=page, page_size=page_size)
 
     @Transactional(propagation=Propagation.REQUIRED)
     async def get_order_by_id(self, order_id: int) -> Optional[OrderDetailResponse]:
@@ -168,9 +170,9 @@ class Service:
         return await self.order_service.find_order(order_number)
 
     @Transactional(propagation=Propagation.REQUIRED)
-    async def search_orders(self, query_text: str) -> List[OrderDetailResponse]:
+    async def search_orders(self, query_text: str, limit: int = 50) -> List[OrderDetailResponse]:
         """Search orders by order number or orderer name"""
-        return await self.order_service.search_orders(query_text)
+        return await self.order_service.search_orders(query_text=query_text, limit=limit)
 
 
     @Transactional(propagation=Propagation.REQUIRED)

@@ -136,7 +136,6 @@ class BaseRepository(Generic[ConcreteTable]):
             schema = self.schema_class(**payload)
             self._session.add(schema)
             await self._session.flush()
-            await self._session.refresh(schema)
             return schema
         except Exception as e:
             print("💥 DATABASE ERROR:", e)
@@ -266,8 +265,8 @@ class BaseRepository(Generic[ConcreteTable]):
         except AttributeError as e:
             raise UnprocessableError(message=f"Invalid attribute in filters: {str(e)}")
         if operator == "OR":
-            query = select(self.schema_class).where(or_(*conditions))
+            query = select(1).select_from(self.schema_class).where(or_(*conditions)).limit(1)
         else:
-            query = select(self.schema_class).where(and_(*conditions))
+            query = select(1).select_from(self.schema_class).where(and_(*conditions)).limit(1)
         result = await self._session.execute(query)
-        return result.scalars().first() is not None
+        return result.first() is not None

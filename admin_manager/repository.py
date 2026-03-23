@@ -29,3 +29,8 @@ class AdminRepository(BaseRepository[Admins]):
     async def create_admin(self, admin_data: dict) -> AdminResponse:
         instance = await self._save(admin_data)
         return AdminResponse.model_validate(instance)
+
+    async def count_admins(self) -> int:
+        query = select(func.count()).select_from(Admins)
+        result = await self._session.execute(query)
+        return int(result.scalar_one() or 0)

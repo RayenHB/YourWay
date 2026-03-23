@@ -1,6 +1,6 @@
 from FastAPI_back.dependencies.service import get_service
 from FastAPI_back.utils.response import Response, ResponseMulti
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi_utils.cbv import cbv
 from orders_manager.OrderRepository import OrderRepository
 from orders_manager.CaseRepository import CaseRepository
@@ -74,9 +74,11 @@ class OrderRouter:
     @order_router.get("/orders", response_model=ResponseMulti[OrderDetailResponse])
     async def get_all_orders(
         self,
+        page: int = Query(default=1, ge=1),
+        page_size: int = Query(default=50, ge=1, le=200),
         current_user: AdminResponse = Depends(get_current_active_user)
     ) -> ResponseMulti[OrderDetailResponse]:
-        results = await self.service.get_all_orders()
+        results = await self.service.get_all_orders(page=page, page_size=page_size)
         return ResponseMulti[OrderDetailResponse](result=results)
 
     @order_router.get("/orders/{order_id}", response_model=Response[OrderDetailResponse])
@@ -102,10 +104,11 @@ class OrderRouter:
     async def search_orders(
         self,
         query: str,
+        limit: int = Query(default=50, ge=1, le=200),
         current_user: AdminResponse = Depends(get_current_active_user)
 
     ) -> ResponseMulti[OrderDetailResponse]:
-        results = await self.service.search_orders(query)
+        results = await self.service.search_orders(query, limit=limit)
         return ResponseMulti[OrderDetailResponse](result=results)
 
     @order_router.put("/orders/{order_id}/complete", response_model=Response[OrderResponse])

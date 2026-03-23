@@ -9,6 +9,8 @@ from FastAPI_back.utils.response import Response
 from admin_manager.schemas import AdminBase, Token
 from admin_manager.security import create_access_token
 from FastAPI_back.dependencies.service import get_service
+from admin_manager.dependencies import get_optional_current_active_user
+from FastAPI_back.utils.errors import AuthorizationError
 
 
 
@@ -35,6 +37,11 @@ class AdminRouter:
     async def create_admin(
         self,
         admin_create: AdminCreate,
+        current_user: AdminResponse | None = Depends(get_optional_current_active_user),
     ) -> Response[AdminResponse]:
+        admin_count = await self.auth_service.count_admins()
+        if admin_count > 0 and current_user is None:
+            raise AuthorizationError(message="Only authenticated admins can create new admins")
+
         admin = await self.auth_service.create_admin(admin_create)
         return Response[AdminResponse](result=admin)

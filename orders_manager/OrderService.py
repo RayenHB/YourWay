@@ -22,8 +22,10 @@ class OrderService:
 
     async def get_all_orders(
             self,
+            page: int = 1,
+            page_size: int = 50,
     ) -> List[OrderDetailResponse]:
-        return await self.order_repository.get_all_orders()
+        return await self.order_repository.get_all_orders(page=page, page_size=page_size)
 
     async def get_order_by_id(self, order_id: int) -> Optional[OrderDetailResponse]:
         return await self.order_repository.get_by_id(order_id)
@@ -33,8 +35,8 @@ class OrderService:
         return await self.order_repository.find_by_order_number(order_number)
 
     @Transactional(propagation=Propagation.REQUIRED)
-    async def search_orders(self, query_text: str) -> List[OrderDetailResponse]:
-        return await self.order_repository.search_by_query(query_text)
+    async def search_orders(self, query_text: str, limit: int = 50) -> List[OrderDetailResponse]:
+        return await self.order_repository.search_by_query(query_text, limit=limit)
 
     @Transactional(propagation=Propagation.REQUIRED)
     async def update_order_status(

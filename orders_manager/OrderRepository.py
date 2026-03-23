@@ -7,6 +7,26 @@ from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 
 
+DEFAULT_ORDER_PAGE_SIZE = 50
+MAX_ORDER_PAGE_SIZE = 200
+DEFAULT_SEARCH_LIMIT = 50
+MAX_SEARCH_LIMIT = 200
+
+
+def _order_relations():
+    return (
+        selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.phone_model),
+        selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.case_type),
+        selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.template),
+    )
+
+
+def _clamp_limit(value: int, default_value: int, max_value: int) -> int:
+    if value is None:
+        return default_value
+    return max(1, min(int(value), max_value))
+
+
 
 class OrderRepository(BaseRepository[OrderTable]):
     
@@ -18,11 +38,7 @@ class OrderRepository(BaseRepository[OrderTable]):
         query = (
             select(OrderTable)
             .where(OrderTable.id == instance.id)
-            .options(
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.phone_model),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.case_type),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.template),
-            )
+            .options(*_order_relations())
         )
         result = await self._session.execute(query)
         instance = result.scalars().one()
@@ -31,15 +47,19 @@ class OrderRepository(BaseRepository[OrderTable]):
 
     async def get_all_orders(
             self,
+            page: int = 1,
+            page_size: int = DEFAULT_ORDER_PAGE_SIZE,
     ) -> List[OrderDetailResponse]:
+        page = max(int(page), 1)
+        page_size = _clamp_limit(page_size, DEFAULT_ORDER_PAGE_SIZE, MAX_ORDER_PAGE_SIZE)
+        offset = (page - 1) * page_size
+
         query = (
             select(OrderTable)
-            .options(
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.phone_model),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.case_type),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.template),
-            )
+            .options(*_order_relations())
             .order_by(OrderTable.created_at.desc())
+            .limit(page_size)
+            .offset(offset)
         )
         result = await self._session.execute(query)
         instances = result.scalars().all()
@@ -49,11 +69,7 @@ class OrderRepository(BaseRepository[OrderTable]):
         query = (
             select(OrderTable)
             .where(OrderTable.id == order_id)
-            .options(
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.phone_model),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.case_type),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.template),
-            )
+            .options(*_order_relations())
         )
         result = await self._session.execute(query)
         instance = result.scalars().one_or_none()
@@ -65,11 +81,7 @@ class OrderRepository(BaseRepository[OrderTable]):
         query = (
             select(OrderTable)
             .where(OrderTable.order_number == order_number)
-            .options(
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.phone_model),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.case_type),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.template),
-            )
+            .options(*_order_relations())
             .limit(1)
         )
         result = await self._session.execute(query)
@@ -78,7 +90,13 @@ class OrderRepository(BaseRepository[OrderTable]):
             return None
         return OrderDetailResponse.model_validate(instance)
 
-    async def search_by_query(self, query_text: str) -> List[OrderDetailResponse]:
+    async def search_by_query(self, query_text: str, limit: int = DEFAULT_SEARCH_LIMIT) -> List[OrderDetailResponse]:
+        query_text = (query_text or "").strip()
+        if not query_text:
+            return []
+
+        limit = _clamp_limit(limit, DEFAULT_SEARCH_LIMIT, MAX_SEARCH_LIMIT)
+
         query = (
             select(OrderTable)
             .where(
@@ -87,12 +105,9 @@ class OrderRepository(BaseRepository[OrderTable]):
                     OrderTable.orderer_name.ilike(f"%{query_text}%"),
                 )
             )
-            .options(
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.phone_model),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.case_type),
-                selectinload(OrderTable.phone_case).selectinload(PhoneCaseTable.template),
-            )
+            .options(*_order_relations())
             .order_by(OrderTable.created_at.desc())
+            .limit(limit)
         )
         result = await self._session.execute(query)
         instances = result.scalars().all()

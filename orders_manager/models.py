@@ -56,8 +56,8 @@ class PhoneCaseTable(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    phone_model_id = Column(Integer, ForeignKey("phone_models.id"), nullable=False)
-    case_type_id = Column(Integer, ForeignKey("phone_case_types.id"), nullable=False)
+    phone_model_id = Column(Integer, ForeignKey("phone_models.id"), nullable=False, index=True)
+    case_type_id = Column(Integer, ForeignKey("phone_case_types.id"), nullable=False, index=True)
 
     # optional commerce fields
     sku = Column(String(100), nullable=True, unique=True)
@@ -82,7 +82,7 @@ class PhoneCaseTemplateTable(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True)
-    phone_case_id = Column(Integer, ForeignKey("phone_cases.id"), nullable=False)
+    phone_case_id = Column(Integer, ForeignKey("phone_cases.id"), nullable=False, index=True)
 
     # Stored in Azure Blob; keep only URLs/keys in Postgres
     base_image_url = Column(String(500), nullable=False)       # preview base (webp/png)
@@ -111,7 +111,7 @@ class OrderTable(Base):
     order_number = Column(String(50), unique=True, nullable=False)
 
     # Link order to a specific sellable variant
-    phone_case_id = Column(Integer, ForeignKey("phone_cases.id"), nullable=False)
+    phone_case_id = Column(Integer, ForeignKey("phone_cases.id"), nullable=False, index=True)
 
     status = Column(Enum(OrderStatus), nullable=False, default=OrderStatus.PENDING)
 
@@ -129,7 +129,7 @@ class OrderTable(Base):
     orderer_email = Column(String(100), nullable=False)
     orderer_phone = Column(String(20), nullable=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
 
     phone_case = relationship("orders_manager.models.PhoneCaseTable")
 
