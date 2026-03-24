@@ -37,6 +37,12 @@ def get_application() -> FastAPI:
     settings = get_app_settings()
     settings.configure_logging()
     application = FastAPI(**settings.fastapi_kwargs)
+
+    settings.allowed_hosts = [
+    "http://localhost:5173", 
+    "https://yourway-aqgcb4dff3dperc4.italynorth-01.azurewebsites.net" # Your Frontend URL
+]
+    
     
 
     static_dir = Path(__file__).resolve().parent / "PhonesImages"
@@ -45,6 +51,7 @@ def get_application() -> FastAPI:
         StaticFiles(directory=str(static_dir)),
         name="static",
     )
+    
 
     # CORS Middleware
     application.add_middleware(
@@ -66,9 +73,6 @@ def get_application() -> FastAPI:
 
 app = get_application()
 
-settings.allowed_hosts = [
-    "http://localhost:5173", 
-    "https://yourway-aqgcb4dff3dperc4.italynorth-01.azurewebsites.net" # Your Frontend URL
-]
+
 
 
