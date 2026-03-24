@@ -30,7 +30,10 @@ from FastAPI_back.utils.events import handle_server_startup_event
 
 
 
-
+settings.allowed_hosts = [
+    "http://localhost:5173",                 # Local development (Vite)
+    "yourwaycases-dcd2b7bkfdgpfvf9.italynorth-01.azurewebsites.net" # Your actual Azure Frontend URL
+]
 
 
 def get_application() -> FastAPI:
