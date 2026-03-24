@@ -30,16 +30,14 @@ from FastAPI_back.utils.events import handle_server_startup_event
 
 
 
-settings.allowed_hosts = [
-    "http://localhost:5173",                 # Local development (Vite)
-    "https://yourwaycases-dcd2b7bkfdgpfvf9.italynorth-01.azurewebsites.net" # Your actual Azure Frontend URL
-]
+
 
 
 def get_application() -> FastAPI:
     settings = get_app_settings()
     settings.configure_logging()
     application = FastAPI(**settings.fastapi_kwargs)
+    
 
     static_dir = Path(__file__).resolve().parent / "PhonesImages"
     application.mount(
@@ -67,5 +65,10 @@ def get_application() -> FastAPI:
 
 
 app = get_application()
+
+settings.allowed_hosts = [
+    "http://localhost:5173", 
+    "https://yourway-aqgcb4dff3dperc4.italynorth-01.azurewebsites.net" # Your Frontend URL
+]
 
 
